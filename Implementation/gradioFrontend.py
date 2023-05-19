@@ -3,12 +3,24 @@ import pandas as pd
 
 test_data = pd.DataFrame([["a", "b", "c", "a", "b", "c"], ["d", "e", "f", "a", "b", "c"]], columns=["A", "B", "C", "a", "b", "c"])
 
+def get_warning_message(n_warning: int):
+	return f"### ⚠️ {n_warning} Warnings found"
+
+def get_error_message(n_export: int):
+	return f"### ⛔ {n_export} Errors found"
+
 def add_medication(medication_name: str, manufacturer_name: str) -> pd.DataFrame:
 	# backend.add_medication(medication_name)
 	# backend.get_warnings()
 	# backend.get_errors()
 	# return backend.get_dataframe()
-	return test_data
+	return {
+		medication_list: test_data,
+		warnings_label: get_warning_message(len(test_data)),
+		warnings_list: test_data,
+		error_lable: get_error_message(len(test_data)),
+		error_list: test_data
+	}
 
 def export_list():
 	test_data.to_csv("some.csv")
@@ -78,16 +90,14 @@ with gr.Blocks() as demo:
 			with gr.Column(scale = 1):
 				submit = gr.Button("➕")
 				submit.style(size = "lg", full_width = False)
-				submit.click(fn=add_medication, inputs=[medication_name, manufacturer_name], 
-					outputs=medication_list, api_name="add_medication")
 
 		with gr.Row():
 			with gr.Column():
-				warnings_label = gr.Markdown("### ⚠️ 0 Warnings found")
+				warnings_label = gr.Markdown(get_warning_message(0))
 				warnings_list = gr.Dataframe(test_data)
 
 			with gr.Column():
-				error_lable = gr.Markdown("### ⛔ 0 Errors found")
+				error_lable = gr.Markdown(get_error_message(9))
 				error_list = gr.Dataframe(test_data)
 
 	
@@ -97,4 +107,8 @@ with gr.Blocks() as demo:
 
 	dowload_button.click(fn=finished_download, outputs=[app_column, file_download_column])
 
-	
+	submit.click(fn=add_medication, inputs=[medication_name, manufacturer_name], 
+					outputs=[medication_list, 
+						warnings_label, warnings_list, 
+						error_lable, error_list],
+					api_name="add_medication")

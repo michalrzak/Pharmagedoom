@@ -2,18 +2,20 @@ import pandas as pd
 
 
 class MedicationData:
-    medication_df = pd.DataFrame
+    columns_ = ['Medication', 'Manufacturer']
+    medication_df = None
 
-    def add_new_medication(self, medication_name, manufacturer):
+    def __init__(self):
+        self.medication_df = pd.DataFrame(columns=self.columns_)
+
+    def add_new_medication(self, medication_name: str, manufacturer: str):
         new_med = {'Medication': medication_name, 'Manufacturer': manufacturer}
-        new_medication_row_df = pd.DataFrame([new_med])
-        pd.concat([self.medication_df, new_medication_row_df], ignore_index=True)
-        return self.medication_df
+        self.medication_df.loc[len(self.medication_df.index)] = new_med
 
     def set_medication_data(self, df):
         self.medication_df = df
 
-    def get_mediction_data(self):
+    def get_medication_data(self):
         return self.medication_df
 
     def import_file(self, filepath):
@@ -22,4 +24,4 @@ class MedicationData:
         return med_csv_data
 
     def export_file(self, filepath):
-        self.medication_df.to_csv('saved_medication.csv', index=False)
+        self.medication_df.to_csv(filepath, index=False)

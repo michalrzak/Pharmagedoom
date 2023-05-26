@@ -7,35 +7,35 @@ test_data = pd.DataFrame([["a", "b", "c", "a", "b", "c"], ["d", "e", "f", "a", "
 medication_data = backend.MedicationData()
 
 
-def get_warning_message(n_warning: int):
+def get_warning_message(n_warning: int) -> str:
     return f"### ⚠️ {n_warning} Warnings found"
 
 
-def get_error_message(n_export: int):
+def get_error_message(n_export: int) -> str:
     return f"### ⛔ {n_export} Errors found"
 
 
-def add_medication(medication_name: str, manufacturer_name: str) -> pd.DataFrame:
+def add_medication(medication_name: str, manufacturer_name: str):
     medication_data.add_new_medication(medication_name, manufacturer_name)
     # backend.get_warnings()
     # backend.get_errors()
-    #return medication_data.get_medication_data()
+    # return medication_data.get_medication_data()
     return {
-		medication_list: test_data,
-		warnings_label: get_warning_message(len(test_data)),
-		warnings_list: test_data,
-		error_lable: get_error_message(len(test_data)),
-		error_list: test_data
-	}
+        medication_list: test_data,
+        warnings_label: get_warning_message(len(test_data)),
+        warnings_list: test_data,
+        error_lable: get_error_message(len(test_data)),
+        error_list: test_data
+    }
 
 
 def export_list():
-    #medication_data.export_file("some.csv")
+    # medication_data.export_file("some.csv")
     test_data.to_csv("some.csv")
 
 
 def import_list():
-    #return medication_data.import_file(filepath="some.csv")
+    # return medication_data.import_file(filepath="some.csv")
     return {
         app_column: gr.update(visible=False),
         file_upload_column: gr.update(visible=True)
@@ -110,7 +110,7 @@ with gr.Blocks() as demo:
                 error_lable = gr.Markdown(get_error_message(9))
                 error_list = gr.Dataframe(test_data)
 
-    # has to be deffined here as it modiefies elements from the app_column
+    # has to be defined here as it modifies elements from the app_column
     upload_button.click(fn=upload_file_process, inputs=upload_file,
                         outputs=[app_column, file_upload_column, medication_list])
 

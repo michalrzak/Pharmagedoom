@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 class MedicationData:
     columns_ = ['Medication', 'Manufacturer']
     medication_df = None

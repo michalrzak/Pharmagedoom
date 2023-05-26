@@ -4,6 +4,10 @@ Another applicaton for checking drug-drug-interaction.
 
 This project was created for the course "Medizinische Entscheidungsunterstützung" (Medical decission support) of the Medical University of Vienna ([course link](https://campus.meduniwien.ac.at/med.campus/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/355577?$ctx=design=ca;lang=de&$scrollTo=toc_overview)).
 
+It uses a trimmed dataset provided in the lecture for checking the drug-drug-interaction.
+
+Note: this is just a simple prototype application 😄
+
 ## Mock-up
 We have created a design-mock up of the app. In this mock-up a user can:
 1. add new medications to the medication list

@@ -17,6 +17,9 @@ class MedicationData:
     def get_medication_data(self):
         return self.medication_df
 
+    def get_medication_name(self):
+        return self.medication_df['Medication']
+
     def import_file(self, filepath):
         med_csv_data = pd.read_csv(filepath)
         self.medication_df = med_csv_data

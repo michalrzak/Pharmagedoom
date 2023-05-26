@@ -1,25 +1,32 @@
+from builtins import object
+
 from DataConversion.convert import convertToPandas
+import numpy as np
+from backend import MedicationData
 # importing the modules
 import pandas as pd
 
 
-class Backend:
+class Interactions:
     def __init__(self):
         self.__dataPand = convertToPandas('DataConversion\\trimmed_data.csv')
-        self.__drugs = list()
 
-    def addMedication(self, drug: str):
-        self.__drugs.append(drug)
+    def __checkInteractions(self, drugs: pd.DataFrame) -> pd.DataFrame:
+        objects = [drug.strip() in list(drugs['Medication']) for drug in list(self.__dataPand['object'])]
+        precipitants = [drug.strip() in list(drugs['Medication']) for drug in list(self.__dataPand['precipitant'])]
+        return self.__dataPand.loc[np.array(objects) & np.array(precipitants)]
 
-    def __checkInteractions(self) -> pd.DataFrame:
-        # get all interactions between drugs in self.__drugs
-        # iterate over list and only check the one coming after the current one
-        return self.__dataPand.loc[(self.__dataPand['object'].isin(self.__drugs)) & (self.__dataPand['precipitant'].isin(self.__drugs))]
+    def getWarnings(self, drugs: pd.DataFrame) -> pd.DataFrame:
+        interactions = self.__checkInteractions(drugs)
+        ret = interactions.loc[(pd.to_numeric(interactions['severity']) == 1) | (pd.to_numeric(interactions['severity']) == 2)]
+        del ret["drug1"]
+        del ret["drug2"]
+        return ret
 
-    def getWarnings(self) -> pd.DataFrame:
-        interactions = self.__checkInteractions()
-        return interactions.loc[(pd.to_numeric(interactions['severity']) == 1) | (pd.to_numeric(interactions['severity']) == 2)]
+    def getErrors(self, drugs: pd.DataFrame) -> pd.DataFrame:
+        interactions = self.__checkInteractions(drugs)
+        ret = interactions.loc[pd.to_numeric(interactions['severity']) == 3]
+        del ret["drug1"]
+        del ret["drug2"]
+        return ret
 
-    def getErrors(self) -> pd.DataFrame:
-        interactions = self.__checkInteractions()
-        return interactions.loc[pd.to_numeric(interactions['severity']) == 3]

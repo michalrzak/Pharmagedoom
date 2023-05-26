@@ -1,10 +1,11 @@
 import gradio as gr
 import pandas as pd
-import backend
+from backend import MedicationData
+from interactions import Interactions
 
-test_data = pd.DataFrame([["a", "b", "c", "a", "b", "c"], ["d", "e", "f", "a", "b", "c"]],
-                         columns=["A", "B", "C", "a", "b", "c"])
-medication_data = backend.MedicationData()
+medication_data = MedicationData()
+test_data = pd.DataFrame(medication_data.get_medication_data())
+interactions = Interactions()
 
 
 def get_warning_message(n_warning: int) -> str:
@@ -17,21 +18,21 @@ def get_error_message(n_export: int) -> str:
 
 def add_medication(medication_name: str, manufacturer_name: str):
     medication_data.add_new_medication(medication_name, manufacturer_name)
-    # backend.get_warnings()
-    # backend.get_errors()
-    # return medication_data.get_medication_data()
+    warnings = interactions.getWarnings(medication_data.get_medication_data())
+    errors = interactions.getErrors(medication_data.get_medication_data())
+
     return {
-        medication_list: test_data,
-        warnings_label: get_warning_message(len(test_data)),
-        warnings_list: test_data,
-        error_lable: get_error_message(len(test_data)),
-        error_list: test_data
+        medication_list: medication_data.get_medication_data(),
+        warnings_label: get_warning_message(len(warnings)),
+        warnings_list: warnings,
+        error_lable: get_error_message(len(errors)),
+        error_list: errors
     }
 
 
 def export_list():
     # medication_data.export_file("some.csv")
-    test_data.to_csv("some.csv")
+    medication_data.get_medication_data().to_csv("some.csv")
 
 
 def import_list():
@@ -45,8 +46,7 @@ def import_list():
 def export_list_():
     # backend call
     # output = backend.MedicationData.get_medication_data()
-    output = test_data
-    test_data.to_csv("output.csv")
+    medication_data.get_medication_data().to_csv("output.csv", index = False)
     return {
         app_column: gr.update(visible=False),
         file_download_column: gr.update(visible=True),
@@ -55,12 +55,20 @@ def export_list_():
 
 
 def upload_file_process(file):
+
     with file as temp:
         dataFrame = pd.read_csv(temp.name)
+
+    warnings = interactions.getWarnings(medication_data.get_medication_data())
+    errors = interactions.getErrors(medication_data.get_medication_data())
     return {
         app_column: gr.update(visible=True),
         file_upload_column: gr.update(visible=False),
-        medication_list: dataFrame
+        medication_list: dataFrame,
+        warnings_list: warnings,
+        error_list: errors,
+        warnings_label: get_warning_message(len(warnings)),
+        error_lable: get_error_message(len(errors))
     }
 
 
@@ -78,7 +86,7 @@ with gr.Blocks() as demo:
 
     with gr.Column(visible=False) as file_download_column:
         dowload_file = gr.File(file_types=[".csv"], interactive=False)
-        dowload_button = gr.Button("finnished")
+        dowload_button = gr.Button("finished")
 
     with gr.Column(visible=True) as app_column:
         with gr.Row():
@@ -95,7 +103,7 @@ with gr.Blocks() as demo:
                     import_button.click(fn=import_list, outputs=[app_column, file_upload_column])
                     export_button = gr.Button("Export List")
                     export_button.style(size="lg", full_width=False)
-                    export_button.click(fn=export_list, outputs=[app_column, file_download_column, dowload_file])
+                    export_button.click(fn=export_list_, outputs=[app_column, file_download_column, dowload_file])
 
             with gr.Column(scale=1):
                 submit = gr.Button("➕")
@@ -107,12 +115,12 @@ with gr.Blocks() as demo:
                 warnings_list = gr.Dataframe(test_data)
 
             with gr.Column():
-                error_lable = gr.Markdown(get_error_message(9))
+                error_lable = gr.Markdown(get_error_message(0))
                 error_list = gr.Dataframe(test_data)
 
     # has to be defined here as it modifies elements from the app_column
     upload_button.click(fn=upload_file_process, inputs=upload_file,
-                        outputs=[app_column, file_upload_column, medication_list])
+                        outputs=[app_column, file_upload_column, medication_list, warnings_list, warnings_label, error_list, error_lable])
 
     dowload_button.click(fn=finished_download, outputs=[app_column, file_download_column])
 
